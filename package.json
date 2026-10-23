@@ -1,0 +1,17 @@
+{
+    "name": "devops-projeto-fase1",
+    "version": "1.0.0",
+    "description": "Projeto pratico de DevOps - Fase 1 PUCRS",
+    "main": "src/server.js",
+    "scripts": {
+      "start": "node src/server.js",
+      "test": "jest --coverage"
+    },
+    "dependencies": {
+      "express": "^4.19.2"
+    },
+    "devDependencies": {
+      "jest": "^29.7.0",
+      "supertest": "^6.3.4"
+    }
+  }
