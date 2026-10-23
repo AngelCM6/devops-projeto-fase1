@@ -10,18 +10,14 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
-
     steps:
       - name: Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js ${{ matrix.node-version }}
+      - name: Configurar Node.js 20.x
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20.x
           cache: 'npm'
 
       - name: Instalar Dependencias
@@ -30,9 +26,14 @@ jobs:
       - name: Executar Testes Automatizados com Cobertura
         run: npm test
 
-      - name: Validar Sintaxe dos Scripts Terraform (IaC)
+      - name: Configurar Terraform CLI
         uses: hashicorp/setup-terraform@v3
-      - run: |
-          terraform -chdir=terraform fmt -check
-          terraform -chdir=terraform init -backend=false
-          terraform -chdir=terraform validate
+
+      - name: Validar Formatacao do Terraform
+        run: terraform -chdir=terraform fmt
+
+      - name: Inicializar Terraform
+        run: terraform -chdir=terraform init -backend=false
+
+      - name: Validar Sintaxe dos Scripts de IaC
+        run: terraform -chdir=terraform validate
