@@ -1,4 +1,4 @@
-name: CI Pipeline - DevOps Fase 1
+name: CI/CD Pipeline - DevOps Fase 2
 
 on:
   push:
@@ -7,7 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  ci-build-and-test:
+    name: CI - Integracao Continua (Build, Test & IaC)
     runs-on: ubuntu-latest
 
     steps:
@@ -37,3 +38,28 @@ jobs:
 
       - name: Validar Sintaxe dos Scripts de IaC
         run: terraform -chdir=terraform validate
+
+  cd-delivery-and-container:
+    name: CD - Entrega Continua & Build Docker
+    needs: ci-build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout do Codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Construir Imagem Docker da Aplicacao
+        run: |
+          docker build -t devops-api-fase2:latest .
+
+      - name: Testar Execucao do Container e Healthcheck
+        run: |
+          docker run -d --name test-api -p 3000:3000 devops-api-fase2:latest
+          sleep 5
+          docker ps
+          curl -f http://localhost:3000/health || exit 1
+          docker stop test-api
